@@ -1,0 +1,2 @@
+stockdatawork.py threadGetData
+pause
