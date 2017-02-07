@@ -11,7 +11,7 @@ def makeSmallPic(picpath):
     im.thumbnail(size,Image.ANTIALIAS)
     im.save(picpath.replace("stocks","smallpics"),"JPEG")
 
-makeSmallPic("stocks/000001.png")
+#makeSmallPic("stocks/000001.png")
 def isWorkFile(path):
     if path.find(".png"):
         return True
