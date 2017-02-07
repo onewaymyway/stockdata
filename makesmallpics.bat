@@ -1,0 +1,2 @@
+makesmallpic.py
+pause
