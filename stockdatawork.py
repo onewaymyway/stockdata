@@ -24,6 +24,8 @@ def initStockBasic():
     codes=stockBasicInfo.index
     print(codes)
     myG["codes"]=codes
+    stockBasicInfo.to_csv("stockinfo.csv",encoding="utf8")
+
     
 def getStockBeginDay(stock):
     global stockBasicInfo
@@ -181,7 +183,32 @@ def threadpoolwork(reverse=False):
     pool.close();
     pool.join()
     
-        
+def threadworkPic(stock):
+    print("work:",stock)
+    if stock in workingStock:
+        return
+    workingStock.append(stock)
+    if isStockOnMarket(stock)==False:
+            return;
+    workAStock(stock)
+    return stock
+    
+def threadpoolworkPic(reverse=False):
+    initStockBasic()
+    print("updateDataWorkLoopPool")
+    stocks=myG["codes"]
+    stocks=list(stocks)
+    #print(stocks)
+    if reverse:
+        stocks.reverse()
+    pool=ThreadPool(4)
+    print(pool)
+    try:
+        pool.map(threadworkPic,stocks)
+    except:
+        pool.map(threadworkPic,stocks)
+    pool.close();
+    pool.join()    
 
 if __name__=="__main__" :
     
@@ -195,8 +222,11 @@ if __name__=="__main__" :
             updateDataWorkLoop(True)
         if workType=="threadGetData":
             threadpoolwork()
+        if workType=="getbasicInfo":
+            initStockBasic()
     else:
-        analyseWorkLoop()
+        #analyseWorkLoop()
+        threadpoolworkPic()
         #updateDataWorkLoop(True)
         #threadpoolwork()
     print("done")
