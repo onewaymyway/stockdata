@@ -17,11 +17,28 @@ def getStockInfo(stock):
     data=ts.get_hist_data(stock)
     print(data)
 
+def getOKStockCode(code):
+    code=str(code)
+    for i in range(0,6):
+        if len(code)<6:
+            code="0"+code
+    return code
+    
 def initStockBasic():
     global stockBasicInfo,myG
-    stockBasicInfo=ts.get_stock_basics()
+
+    
+    if 1<2:
+        myG["basicfromcsv"]=True;
+        stockBasicInfo=pd.read_csv("stockinfo.csv",index_col="code")
+    else:
+        stockBasicInfo=ts.get_stock_basics()
+
+
     #print(stockBasicInfo)
-    codes=stockBasicInfo.index
+    codes=list(stockBasicInfo.index)
+    for i in range(0,len(codes)):
+        codes[i]=getOKStockCode(codes[i])
     print(codes)
     myG["codes"]=codes
     stockBasicInfo.to_csv("stockinfo.csv",encoding="utf8")
@@ -30,6 +47,10 @@ def initStockBasic():
 def getStockBeginDay(stock):
     global stockBasicInfo
     df = stockBasicInfo
+    #print(df)
+    if myG["basicfromcsv"]==True:
+        stock =int(stock)
+    #print(stock)
     date = df.ix[stock]['timeToMarket'] #上市日期YYYYMMDD
     #print(df.ix[stock])
     #print(date)
@@ -41,13 +62,55 @@ def getStockBeginDay(stock):
 def isStockOnMarket(stock):
     global stockBasicInfo
     df = stockBasicInfo
+    #print(df)
+    if myG["basicfromcsv"]==True:
+        stock =int(stock)
     date = df.ix[stock]['timeToMarket'] #上市日期YYYYMMDD
-    #print(df.ix[stock])
+    
     if date==0:
         return False
     return True
 
+def getStockData2(stock,start,end):
+    filepath="stockdatas/"+stock+".csv"
+    if os.path.exists(filepath):
+        print("getDataFromDisk:",stock)
+        hist_data=pd.read_csv(filepath,index_col="date")
+        hindex=hist_data.index
+        print(max(hindex))
+        premax=max(hindex)
+        #print(hist_data.ix[premax])
+        #print(hist_data)
+        hist_data=hist_data.drop(premax)
+        #print(hist_data)
+        #return
+        if premax==getToday():
+            return hist_data
+
+        newdata=ts.get_h_data(stock,premax,getToday())
+        newdata.to_csv(filepath)
+        newdata=pd.read_csv(filepath,index_col="date")
+        print(newdata)
+     
+        tdata=pd.concat([newdata,hist_data])
+
+        #print(tdata)
+        tdata.to_csv(filepath)
+        hist_data=pd.read_csv(filepath,index_col="date")
+        
+    else:  
+        print("getDataFromNet:",stock,start,end)
+        hist_data=ts.get_h_data(stock,start,end)
+        print("saveData:",stock)
+        print(type(hist_data))
+        if type(hist_data)==type(None):
+            return None
+            
+        hist_data.to_csv(filepath)
+    return hist_data
+    
 def getStockData(stock,start,end):
+    #return getStockData2(stock,start,end)
     filepath="stockdatas/"+stock+".csv"
     if os.path.exists(filepath):
         print("getDataFromDisk:",stock)
@@ -128,10 +191,14 @@ def workStocks(stocks):
             continue;
         workAStock(stock)
 
-def updateStockDataWork(stock):
+def updateStockDataWork(stock,updating=False):
     start=getStockBeginDay(stock)
     end=getToday()
-    getStockData(stock,start,end);
+    if updating==False:
+        getStockData(stock,start,end);
+    else:
+        getStockData2(stock,start,end);
+    #getStockData(stock,start,end);
 
 def analyseWorkLoop():
     initStockBasic()
@@ -143,7 +210,11 @@ def updateStocks(stocks):
         #print(stock)
         if isStockOnMarket(stock)==False:
             continue;
-        updateStockDataWork(stock)
+        try:
+            updateStockDataWork(stock,True)
+        except:
+            pass
+        
 
 def updateDataWorkLoop(reverse=False):
     initStockBasic()
@@ -163,7 +234,7 @@ def threadwork(stock):
     workingStock.append(stock)
     if isStockOnMarket(stock)==False:
             return;
-    updateStockDataWork(stock)
+    updateStockDataWork(stock,True)
     return stock
     
 def threadpoolwork(reverse=False):
@@ -225,9 +296,11 @@ if __name__=="__main__" :
         if workType=="getbasicInfo":
             initStockBasic()
     else:
-        #analyseWorkLoop()
-        threadpoolworkPic()
+        analyseWorkLoop()
+        #threadpoolworkPic()
         #updateDataWorkLoop(True)
         #threadpoolwork()
+        #initStockBasic()
+        #updateStockDataWork("600641")
     print("done")
 
