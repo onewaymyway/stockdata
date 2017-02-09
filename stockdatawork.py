@@ -168,8 +168,11 @@ def saveStockKLine(stock,start,end):
     plt.title("Code："+stock+"")
     plt.xlabel("Time")
     plt.ylabel("Price")
+    print("candlestick_ohlc")
     mpf.candlestick_ohlc(ax,data_list,width=1,colorup='r',colordown='green')
+    print("grid");
     plt.grid()
+    print("savefig");
     fig.savefig(filepath)
     plt.close("all")
     print("savedPic:",stock)
@@ -200,10 +203,15 @@ def updateStockDataWork(stock,updating=False):
         getStockData2(stock,start,end);
     #getStockData(stock,start,end);
 
-def analyseWorkLoop():
+def analyseWorkLoop(reverse=False):
     initStockBasic()
     #workAStock("000993")
-    workStocks(myG["codes"])
+    stocks=myG["codes"]
+    stocks=list(stocks)
+    #print(stocks)
+    if reverse:
+        stocks.reverse()
+    workStocks(stocks)
 
 def updateStocks(stocks):
     for stock in stocks:
@@ -295,6 +303,8 @@ if __name__=="__main__" :
             threadpoolwork()
         if workType=="getbasicInfo":
             initStockBasic()
+        if workType=="getpicR":
+            analyseWorkLoop(True)
     else:
         analyseWorkLoop()
         #threadpoolworkPic()
