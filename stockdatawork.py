@@ -12,6 +12,7 @@ from multiprocessing.dummy import Pool as ThreadPool
 stockBasicInfo=None
 myG={}
 workingStock=[]
+blackList=["000033"]
 
 def getStockInfo(stock):  
     data=ts.get_hist_data(stock)
@@ -28,10 +29,11 @@ def initStockBasic():
     global stockBasicInfo,myG
 
     
-    if 1<2:
+    if 1<0:
         myG["basicfromcsv"]=True;
         stockBasicInfo=pd.read_csv("stockinfo.csv",index_col="code")
     else:
+        myG["basicfromcsv"]=False;
         stockBasicInfo=ts.get_stock_basics()
 
 
@@ -41,6 +43,10 @@ def initStockBasic():
         codes[i]=getOKStockCode(codes[i])
     print(codes)
     myG["codes"]=codes
+    for tstock in blackList:
+        print(tstock)
+        codes.remove(tstock)
+        
     stockBasicInfo.to_csv("stockinfo.csv",encoding="utf8")
 
     
