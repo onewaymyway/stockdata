@@ -1,4 +1,4 @@
-import tushare as ts
+﻿import tushare as ts
 import matplotlib.pyplot as plt
 import matplotlib.finance as mpf
 from matplotlib.pylab import date2num
@@ -13,6 +13,7 @@ stockBasicInfo=None
 myG={}
 workingStock=[]
 blackList=["000033"]
+lastTradeDay=""
 
 def getStockInfo(stock):  
     data=ts.get_hist_data(stock)
@@ -29,7 +30,7 @@ def initStockBasic():
     global stockBasicInfo,myG
 
     
-    if 1<0:
+    if 1<2:
         myG["basicfromcsv"]=True;
         stockBasicInfo=pd.read_csv("stockinfo.csv",index_col="code")
     else:
@@ -90,10 +91,10 @@ def getStockData2(stock,start,end):
         hist_data=hist_data.drop(premax)
         #print(hist_data)
         #return
-        if premax==getToday():
+        if premax==getLastTradeDay():
             return hist_data
 
-        newdata=ts.get_h_data(stock,premax,getToday())
+        newdata=ts.get_h_data(stock,premax,getLastTradeDay())
         newdata.to_csv(filepath)
         newdata=pd.read_csv(filepath,index_col="date")
         print(newdata)
@@ -133,7 +134,26 @@ def getStockData(stock,start,end):
     return hist_data
     
 #getStockInfo("600848")
+def checkStockData(stock):
+    filepath="stockdatas/"+stock+".csv"
+    if not os.path.exists(filepath):
+        return
+    hist_data=pd.read_csv(filepath,index_col="date")
+    indexs=list(hist_data.index)
+    indexs.sort()
+    for i in range(1,len(indexs)):
+        nextV=hist_data.loc[indexs[i]]
+        preV=hist_data.loc[indexs[i-1]]
+        openv=nextV["open"]
+        closev=preV["close"]
+        if openv>closev*1.2:
+            print("wrong stock:",stock,indexs[i-1],indexs[i])
+            return
+        if openv<closev*0.85:
+            print("wrong stock:",stock,indexs[i-1],indexs[i])
+            return
 
+    
 def saveStockKLine(stock,start,end):
     filepath="stocks/"+stock+".png"
     if os.path.exists(filepath):
@@ -189,6 +209,30 @@ def getToday():
     nowstr=now.strftime("%Y-%m-%d")
     return nowstr
 
+def getDateStr(date):
+    return date.strftime("%Y-%m-%d")
+
+def getDDayStr(d):
+    return getDateStr(getDDate(datetime.date.today(),d))
+
+def getDDate(date,d):
+    dt=getDateTimeFromDate(date)
+    dt=date+datetime.timedelta(days=1)*d
+    return dt
+
+def getDateTimeFromDate(date):
+    return datetime.datetime(date.year,date.month,date.day)
+
+def getLastTradeDay():
+    global lastTradeDay
+    if not lastTradeDay=="":
+        return lastTradeDay
+    startDay=getDDayStr(-25);
+    data=ts.get_hist_data('sh',startDay)
+    lastTradeDay=lastDay=max(data.index)
+    return lastDay
+
+
 def workAStock(stock):
     start=getStockBeginDay(stock)
     end=getToday()
@@ -200,6 +244,20 @@ def workStocks(stocks):
             continue;
         workAStock(stock)
 
+def checkStocks(stocks):
+    for stock in stocks:
+        if isStockOnMarket(stock)==False:
+            continue;
+        checkStockData(stock)   
+
+def checkStocksLoop():
+    initStockBasic()
+    print("checkStocksLoop")
+    stocks=myG["codes"]
+    stocks=list(stocks)
+    
+    checkStocks(stocks)
+    
 def updateStockDataWork(stock,updating=False):
     start=getStockBeginDay(stock)
     end=getToday()
@@ -259,7 +317,7 @@ def threadpoolwork(reverse=False):
     #print(stocks)
     if reverse:
         stocks.reverse()
-    pool=ThreadPool(20)
+    pool=ThreadPool(50)
     print(pool)
     try:
         pool.map(threadwork,stocks)
@@ -311,6 +369,8 @@ if __name__=="__main__" :
             initStockBasic()
         if workType=="getpicR":
             analyseWorkLoop(True)
+        if workType=="checkStock":
+            checkStocksLoop()
     else:
         analyseWorkLoop()
         #threadpoolworkPic()
