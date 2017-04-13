@@ -230,7 +230,8 @@ def getLastTradeDay():
     startDay=getDDayStr(-25);
     data=ts.get_hist_data('sh',startDay)
     lastTradeDay=lastDay=max(data.index)
-    return lastDay
+    print("lastTradeDay",lastTradeDay)
+    return lastTradeDay
 
 
 def workAStock(stock):
