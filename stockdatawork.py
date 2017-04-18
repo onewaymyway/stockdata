@@ -26,11 +26,11 @@ def getOKStockCode(code):
             code="0"+code
     return code
     
-def initStockBasic():
+def initStockBasic(useNet=False):
     global stockBasicInfo,myG
 
     
-    if 1<2:
+    if not useNet:
         myG["basicfromcsv"]=True;
         stockBasicInfo=pd.read_csv("stockinfo.csv",index_col="code")
     else:
@@ -229,7 +229,7 @@ def getLastTradeDay():
         return lastTradeDay
     startDay=getDDayStr(-25);
     data=ts.get_hist_data('sh',startDay)
-    lastTradeDay=lastDay=max(data.index)
+    lastTradeDay=max(data.index)
     print("lastTradeDay",lastTradeDay)
     return lastTradeDay
 
@@ -367,7 +367,7 @@ if __name__=="__main__" :
         if workType=="threadGetData":
             threadpoolwork()
         if workType=="getbasicInfo":
-            initStockBasic()
+            initStockBasic(True)
         if workType=="getpicR":
             analyseWorkLoop(True)
         if workType=="checkStock":
