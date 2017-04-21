@@ -15,6 +15,9 @@ workingStock=[]
 blackList=["000033"]
 lastTradeDay=""
 
+def removeFile(file):
+    os.remove(file)
+    
 def getStockInfo(stock):  
     data=ts.get_hist_data(stock)
     print(data)
@@ -134,13 +137,14 @@ def getStockData(stock,start,end):
     return hist_data
     
 #getStockInfo("600848")
-def checkStockData(stock):
+def checkStockData(stock,removeBad=False):
     filepath="stockdatas/"+stock+".csv"
     if not os.path.exists(filepath):
         return
     hist_data=pd.read_csv(filepath,index_col="date")
     indexs=list(hist_data.index)
     indexs.sort()
+    isWrong=False
     for i in range(1,len(indexs)):
         nextV=hist_data.loc[indexs[i]]
         preV=hist_data.loc[indexs[i-1]]
@@ -148,10 +152,15 @@ def checkStockData(stock):
         closev=preV["close"]
         if openv>closev*1.2:
             print("wrong stock:",stock,indexs[i-1],indexs[i])
-            return
+            isWrong=True
+            break
         if openv<closev*0.85:
             print("wrong stock:",stock,indexs[i-1],indexs[i])
-            return
+            isWrong=True
+            break
+    if isWrong and removeBad:
+        print("removeFile",filepath)
+        removeFile(filepath)
 
     
 def saveStockKLine(stock,start,end):
@@ -249,7 +258,7 @@ def checkStocks(stocks):
     for stock in stocks:
         if isStockOnMarket(stock)==False:
             continue;
-        checkStockData(stock)   
+        checkStockData(stock,True)   
 
 def checkStocksLoop():
     initStockBasic()
