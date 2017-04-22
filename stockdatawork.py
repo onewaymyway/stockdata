@@ -145,11 +145,18 @@ def checkStockData(stock,removeBad=False):
     indexs=list(hist_data.index)
     indexs.sort()
     isWrong=False
+    tarday="2016-01-01"
     for i in range(1,len(indexs)):
+        if i<10:
+            continue;
+        if indexs[i-1]<tarday:
+            continue;
         nextV=hist_data.loc[indexs[i]]
         preV=hist_data.loc[indexs[i-1]]
         openv=nextV["open"]
         closev=preV["close"]
+        
+
         if openv>closev*1.2:
             print("wrong stock:",stock,indexs[i-1],indexs[i])
             isWrong=True
@@ -256,8 +263,7 @@ def workStocks(stocks):
 
 def checkStocks(stocks):
     for stock in stocks:
-        if isStockOnMarket(stock)==False:
-            continue;
+        print(stock)
         checkStockData(stock,True)   
 
 def checkStocksLoop():
