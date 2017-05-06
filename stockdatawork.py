@@ -91,22 +91,39 @@ def getStockData2(stock,start,end):
         premax=max(hindex)
         #print(hist_data.ix[premax])
         #print(hist_data)
-        hist_data=hist_data.drop(premax)
+        
         #print(hist_data)
         #return
         if premax==getLastTradeDay():
             return hist_data
+            
+        preCloseP=hist_data.ix[premax]["close"]
+        hist_data=hist_data.drop(premax)
 
         newdata=ts.get_h_data(stock,premax,getLastTradeDay())
-        newdata.to_csv(filepath)
-        newdata=pd.read_csv(filepath,index_col="date")
-        print(newdata)
-     
-        tdata=pd.concat([newdata,hist_data])
-
-        #print(tdata)
-        tdata.to_csv(filepath)
-        hist_data=pd.read_csv(filepath,index_col="date")
+        newCloseP=newdata.ix[premax]["close"][0]
+        #print(newdata.ix[premax])
+        print("preclose:",preCloseP,"newclose:",newCloseP)
+        if abs(preCloseP-newCloseP)>0.1:
+            print("wrong price make new:",stock,start,end)
+            hist_data=ts.get_h_data(stock,start,end)
+            print("saveData:",stock)
+            print(type(hist_data))
+            if type(hist_data)==type(None):
+                return None
+                
+            hist_data.to_csv(filepath)
+        else:
+            print("ok price")
+            newdata.to_csv(filepath)
+            newdata=pd.read_csv(filepath,index_col="date")
+            print(newdata)
+         
+            tdata=pd.concat([newdata,hist_data])
+    
+            #print(tdata)
+            tdata.to_csv(filepath)
+            hist_data=pd.read_csv(filepath,index_col="date")
         
     else:  
         print("getDataFromNet:",stock,start,end)
@@ -127,7 +144,7 @@ def getStockData(stock,start,end):
         hist_data=pd.read_csv(filepath,index_col="date")
     else:  
         print("getDataFromNet:",stock,start,end)
-        hist_data=ts.get_h_data(stock,start,end)
+        hist_data=ts.get_h_data(stock,start,end,autype='hfq')
         print("saveData:",stock)
         print(type(hist_data))
         if type(hist_data)==type(None):
@@ -393,6 +410,6 @@ if __name__=="__main__" :
         #updateDataWorkLoop(True)
         #threadpoolwork()
         #initStockBasic()
-        #updateStockDataWork("600641")
+        #updateStockDataWork("600601",True)
     print("done")
 
