@@ -3,7 +3,7 @@ from timerloop import TimeList
 from taskrunutils import runTaskFile
 
 def updateWork():
-    runTaskFile("updateAndMakeConfigTask.json")
+    runTaskFile("updateAndMakeConfigTask2.json")
     
 def myWork():
     timeL=TimeList()
