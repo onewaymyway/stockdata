@@ -51,4 +51,4 @@ def runTaskFile(file):
 #excuteExesAndWaitToEnd(["D:/me/tools/ApacheSubversion/bin/svn.exe commit -m hihi D:/me/python/stockdata.git/trunk/stockdatas"])
 
 if __name__ == '__main__':
-    runTaskFile("updateAndMakeConfigTask.json")
+    runTaskFile("updateAndMakeConfigTask2.json")
