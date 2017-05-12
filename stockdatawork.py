@@ -14,6 +14,8 @@ myG={}
 workingStock=[]
 blackList=["000033"]
 lastTradeDay=""
+last2TradeDay=""
+todayData=None
 
 def removeFile(file):
     os.remove(file)
@@ -258,15 +260,126 @@ def getDateTimeFromDate(date):
 
 def getLastTradeDay():
     global lastTradeDay
+    global last2TradeDay
     if not lastTradeDay=="":
         return lastTradeDay
     startDay=getDDayStr(-25);
     data=ts.get_hist_data('sh',startDay)
-    lastTradeDay=max(data.index)
+    indexList=list(data.index)
+    indexList.sort()
+    indexList.reverse()
+    lastTradeDay=indexList[0]
     print("lastTradeDay",lastTradeDay)
+    last2TradeDay=data.index[1]
+    print("last2TradeDay",last2TradeDay)
     return lastTradeDay
 
+def fastUpdateData():
+    initStockBasic(True)
+    getLastTradeDay()
+    global todayData
+    todayData=ts.get_today_all()
+    #print(todayData)
+    #fastUpdateStock("600652",0,0)
 
+def getTodayStockData(stock):
+    todayO=todayData[todayData.code==stock];
+    #print(stock,todayO)
+    if todayO.size<=0:
+        return None
+    todayO=todayO.ix[todayO.index[0]]
+    dfO={}
+    dfO["date"]=getLastTradeDay()
+    #date,open,high,close,low,volume,amount
+    dfO["open"]=todayO["open"]
+    dfO["high"]=todayO["high"]
+    dfO["close"]=todayO["trade"]
+    dfO["low"]=todayO["low"]
+    dfO["volume"]=todayO["volume"]
+    dfO["amount"]=todayO["amount"]
+    dfO["prePrice"]=todayO["settlement"]
+    #dfO["Name"]=getLastTradeDay()
+
+    return dfO
+    
+def fastUpdateStock(stock,start,end):
+    print("fast update:",stock,start,end)
+    filepath="stockdatas/"+stock+".csv"
+    if os.path.exists(filepath):
+        print("getDataFromDisk:",stock)
+        hist_data=pd.read_csv(filepath,index_col="date")
+        hindex=hist_data.index
+        print(max(hindex))
+        premax=max(hindex)
+        #print(hist_data.ix[premax])
+        #print(hist_data)
+        
+        #print(hist_data)
+        #return
+        preCloseP=hist_data.ix[premax]["close"]
+        if premax==getLastTradeDay():
+            return hist_data
+        print(premax,last2TradeDay)
+        if premax==last2TradeDay:
+            dd=getTodayStockData(stock)
+            if dd==None or abs(dd["prePrice"]-preCloseP)>0.1:
+                pass
+            else:
+                del dd["prePrice"]
+                #print(dd)
+                #print(hist_data.ix[premax])
+                tdff=pd.DataFrame([[dd["date"],dd["open"],dd["high"],dd["close"],dd["low"],dd["volume"],dd["amount"]]],columns=["date","open","high","close","low","volume","amount"])
+                tdff=tdff.set_index("date")
+                #tdff=pd.DataFrame(dd)​
+                #print(hist_data)
+                #print(tdff)
+                #hist_data=hist_data.append(tdff)
+                hist_data=tdff.append(hist_data)
+                #print(hist_data)
+                print("fast success")
+                hist_data.to_csv(filepath)
+                return hist_data
+
+        #return
+       
+        hist_data=hist_data.drop(premax)
+
+        newdata=ts.get_h_data(stock,premax,getLastTradeDay())
+        newCloseP=newdata.ix[premax]["close"][0]
+        #print(newdata.ix[premax])
+        print("preclose:",preCloseP,"newclose:",newCloseP)
+        if abs(preCloseP-newCloseP)>0.1:
+            print("wrong price make new:",stock,start,end)
+            hist_data=ts.get_h_data(stock,start,end)
+            print("saveData:",stock)
+            print(type(hist_data))
+            if type(hist_data)==type(None):
+                return None
+                
+            hist_data.to_csv(filepath)
+        else:
+            print("ok price")
+            newdata.to_csv(filepath)
+            newdata=pd.read_csv(filepath,index_col="date")
+            print(newdata)
+         
+            tdata=pd.concat([newdata,hist_data])
+    
+            #print(tdata)
+            tdata.to_csv(filepath)
+            hist_data=pd.read_csv(filepath,index_col="date")
+        
+    else:  
+        print("getDataFromNet:",stock,start,end)
+        hist_data=ts.get_h_data(stock,start,end)
+        print("saveData:",stock)
+        print(type(hist_data))
+        if type(hist_data)==type(None):
+            return None
+            
+        hist_data.to_csv(filepath)
+    return hist_data   
+    
 def workAStock(stock):
     start=getStockBeginDay(stock)
     end=getToday()
@@ -291,9 +404,13 @@ def checkStocksLoop():
     
     checkStocks(stocks)
     
-def updateStockDataWork(stock,updating=False):
+def updateStockDataWork(stock,updating=False,fast=False):
     start=getStockBeginDay(stock)
     end=getToday()
+    if fast==True:
+        fastUpdateStock(stock,start,end)
+        return
+        
     if updating==False:
         getStockData(stock,start,end);
     else:
@@ -310,18 +427,18 @@ def analyseWorkLoop(reverse=False):
         stocks.reverse()
     workStocks(stocks)
 
-def updateStocks(stocks):
+def updateStocks(stocks,fast=False):
     for stock in stocks:
         #print(stock)
         if isStockOnMarket(stock)==False:
             continue;
         try:
-            updateStockDataWork(stock,True)
+            updateStockDataWork(stock,True,fast)
         except:
-            pass
+            time.sleep(1)
         
 
-def updateDataWorkLoop(reverse=False):
+def updateDataWorkLoop(reverse=False,fast=False):
     initStockBasic()
     print("updateDataWorkLoop")
     stocks=myG["codes"]
@@ -330,7 +447,10 @@ def updateDataWorkLoop(reverse=False):
     if reverse:
         stocks.reverse()
     
-    updateStocks(stocks)
+    if fast==True:
+        fastUpdateData()
+        
+    updateStocks(stocks,fast)
 
 def threadwork(stock):
     print("work:",stock)
@@ -392,6 +512,8 @@ if __name__=="__main__" :
     if len(sys.argv)==2:
         workType=sys.argv[1]
         print(workType)
+        if workType=="getdatafast":
+            updateDataWorkLoop(False,True)
         if workType=="getdata":
             updateDataWorkLoop()
         if workType=="getdataR":
@@ -405,6 +527,8 @@ if __name__=="__main__" :
         if workType=="checkStock":
             checkStocksLoop()
     else:
+        #fastUpdateData()
+        #updateDataWorkLoop(False,True)
         analyseWorkLoop()
         #threadpoolworkPic()
         #updateDataWorkLoop(True)
