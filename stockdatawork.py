@@ -320,8 +320,12 @@ def fastUpdateStock(stock,start,end):
         if premax==getLastTradeDay():
             return hist_data
         print(premax,last2TradeDay)
+        dd=getTodayStockData(stock)
+        if dd!=None and dd["high"]==0:
+            print("not trade:",stock)
+            return hist_data
         if premax==last2TradeDay:
-            dd=getTodayStockData(stock)
+            
             if dd==None or abs(dd["prePrice"]-preCloseP)>0.1:
                 pass
             else:
