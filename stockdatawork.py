@@ -275,10 +275,19 @@ def getLastTradeDay():
     return lastTradeDay
 
 def fastUpdateData():
-    initStockBasic(True)
+    initStockBasic(False)
     getLastTradeDay()
     global todayData
-    todayData=ts.get_today_all()
+    getDataSuccess=False
+    while(not getDataSuccess):
+        try:
+            todayData=ts.get_today_all()
+            getDataSuccess=True
+        except:
+            print("get_today_all fail retry later")
+            time.sleep(5)
+            
+    print("get_today_all datasuccess")
     #print(todayData)
     #fastUpdateStock("600652",0,0)
 
