@@ -2,6 +2,7 @@
 import subprocess   
 import time
 import json
+import sys
 
 def isAllDone(subs):
     for p in subs:
@@ -51,4 +52,8 @@ def runTaskFile(file):
 #excuteExesAndWaitToEnd(["D:/me/tools/ApacheSubversion/bin/svn.exe commit -m hihi D:/me/python/stockdata.git/trunk/stockdatas"])
 
 if __name__ == '__main__':
-    runTaskFile("updateAndMakeConfigTask2.json")
+    print(sys.argv)
+    if len(sys.argv)==2:
+        runTaskFile(sys.argv[1])
+    else:
+        runTaskFile("updateAndMakeConfigTask2.json")
