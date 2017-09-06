@@ -268,9 +268,11 @@ def getLastTradeDay():
     indexList=list(data.index)
     indexList.sort()
     indexList.reverse()
-    lastTradeDay=indexList[0]
+    offsetDay=0
+    offsetDay=1
+    lastTradeDay=indexList[0+offsetDay]
     print("lastTradeDay",lastTradeDay)
-    last2TradeDay=data.index[1]
+    last2TradeDay=data.index[1+offsetDay]
     print("last2TradeDay",last2TradeDay)
     return lastTradeDay
 
@@ -281,7 +283,8 @@ def fastUpdateData():
     getDataSuccess=False
     while(not getDataSuccess):
         try:
-            todayData=ts.get_today_all()
+            #todayData=ts.get_today_all()
+            todayData=ts.get_day_all(getLastTradeDay())
             getDataSuccess=True
         except:
             print("get_today_all fail retry later")
@@ -293,7 +296,7 @@ def fastUpdateData():
 
 def getTodayStockData(stock):
     todayO=todayData[todayData.code==stock];
-    #print(stock,todayO)
+    #print(stock,todayO,todayO.size)
     if todayO.size<=0:
         return None
     todayO=todayO.ix[todayO.index[0]]
@@ -302,12 +305,15 @@ def getTodayStockData(stock):
     #date,open,high,close,low,volume,amount
     dfO["open"]=todayO["open"]
     dfO["high"]=todayO["high"]
-    dfO["close"]=todayO["trade"]
+    #dfO["close"]=todayO["trade"]
+    dfO["close"]=todayO["price"]
     dfO["low"]=todayO["low"]
     dfO["volume"]=todayO["volume"]
     dfO["amount"]=todayO["amount"]
-    dfO["prePrice"]=todayO["settlement"]
+    #dfO["prePrice"]=todayO["settlement"]
+    dfO["prePrice"]=todayO["preprice"]
     #dfO["Name"]=getLastTradeDay()
+    #print(stock,dfO)
 
     return dfO
     
@@ -326,16 +332,20 @@ def fastUpdateStock(stock,start,end):
         #print(hist_data)
         #return
         preCloseP=hist_data.ix[premax]["close"]
-        if premax==getLastTradeDay():
+        print("pinfo:",premax,getLastTradeDay(),premax>=getLastTradeDay())
+        if premax>=getLastTradeDay():
             return hist_data
         print(premax,last2TradeDay)
         dd=getTodayStockData(stock)
+        #print("getTodayStockData success",dd)
         if dd!=None and dd["high"]==0:
             print("not trade:",stock)
             return hist_data
+        #print("premax==last2TradeDay",premax==last2TradeDay,dd)
         if premax==last2TradeDay:
             
             if dd==None or abs(dd["prePrice"]-preCloseP)>0.1:
+                print("price not ok:")
                 pass
             else:
                 del dd["prePrice"]
@@ -363,6 +373,8 @@ def fastUpdateStock(stock,start,end):
         print("preclose:",preCloseP,"newclose:",newCloseP)
         if abs(preCloseP-newCloseP)>0.1:
             print("wrong price make new:",stock,start,end)
+            print("skip now:");
+            return None
             hist_data=ts.get_h_data(stock,start,end)
             print("saveData:",stock)
             print(type(hist_data))
@@ -447,7 +459,8 @@ def updateStocks(stocks,fast=False):
             continue;
         try:
             updateStockDataWork(stock,True,fast)
-        except:
+        except Exception as err:
+            print(err)
             time.sleep(1)
         
 
