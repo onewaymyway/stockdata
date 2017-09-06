@@ -269,7 +269,7 @@ def getLastTradeDay():
     indexList.sort()
     indexList.reverse()
     offsetDay=0
-    offsetDay=1
+    #offsetDay=1
     lastTradeDay=indexList[0+offsetDay]
     print("lastTradeDay",lastTradeDay)
     last2TradeDay=data.index[1+offsetDay]
