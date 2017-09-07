@@ -281,13 +281,18 @@ def fastUpdateData():
     getLastTradeDay()
     global todayData
     getDataSuccess=False
+    sameDay=getLastTradeDay()==getToday()
+    print("sameDay:",sameDay)
     while(not getDataSuccess):
         try:
-            #todayData=ts.get_today_all()
-            todayData=ts.get_day_all(getLastTradeDay())
+            #
+            if sameDay:
+                todayData=ts.get_today_all()
+            else:
+                todayData=ts.get_day_all(getLastTradeDay())
             getDataSuccess=True
-        except:
-            print("get_today_all fail retry later")
+        except Exception as err:
+            print("get_today_all fail retry later",err)
             time.sleep(5)
             
     print("get_today_all datasuccess")
@@ -305,13 +310,19 @@ def getTodayStockData(stock):
     #date,open,high,close,low,volume,amount
     dfO["open"]=todayO["open"]
     dfO["high"]=todayO["high"]
-    #dfO["close"]=todayO["trade"]
-    dfO["close"]=todayO["price"]
+    if "trade" in todayO:
+        dfO["close"]=todayO["trade"]
+    if "price" in todayO:
+        dfO["close"]=todayO["price"]
+    
     dfO["low"]=todayO["low"]
     dfO["volume"]=todayO["volume"]
     dfO["amount"]=todayO["amount"]
-    #dfO["prePrice"]=todayO["settlement"]
-    dfO["prePrice"]=todayO["preprice"]
+    if "settlement" in todayO:
+        dfO["prePrice"]=todayO["settlement"]
+    if "preprice" in todayO:
+        dfO["prePrice"]=todayO["preprice"]
+    
     #dfO["Name"]=getLastTradeDay()
     #print(stock,dfO)
 
@@ -367,15 +378,15 @@ def fastUpdateStock(stock,start,end):
        
         hist_data=hist_data.drop(premax)
 
-        newdata=ts.get_h_data(stock,premax,getLastTradeDay())
+        newdata=ts.get_h_data(stock,premax,getLastTradeDay(),pause=1)
         newCloseP=newdata.ix[premax]["close"][0]
         #print(newdata.ix[premax])
         print("preclose:",preCloseP,"newclose:",newCloseP)
         if abs(preCloseP-newCloseP)>0.1:
             print("wrong price make new:",stock,start,end)
-            print("skip now:");
-            return None
-            hist_data=ts.get_h_data(stock,start,end)
+            #print("skip now:");
+            #return None
+            hist_data=ts.get_h_data(stock,start,end,pause=1)
             print("saveData:",stock)
             print(type(hist_data))
             if type(hist_data)==type(None):
@@ -431,7 +442,7 @@ def checkStocksLoop():
     
 def updateStockDataWork(stock,updating=False,fast=False):
     start=getStockBeginDay(stock)
-    end=getToday()
+    end=getLastTradeDay()
     if fast==True:
         fastUpdateStock(stock,start,end)
         return
