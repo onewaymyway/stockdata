@@ -341,7 +341,14 @@ def getTodayStockData(stock):
 def adptDataFrame(df):
     if "code" in df.columns:
         df.drop("code",1,inplace=True)
-        
+def saveDataFrameData(hist_data,filepath):
+    hist_data.to_csv(filepath, float_format='%.3f',columns=["date","close","high","low","open","volume"])
+
+def readStockDataFromFile(filepath):
+    hist_data=pd.read_csv(filepath,index_col="date")
+    adptDataFrame(hist_data)
+    return hist_data
+    
 def fastUpdateStock(stock,start,end):
     print("fast update:",stock,start,end)
     filepath=dataPath+stock+".csv"
@@ -389,7 +396,7 @@ def fastUpdateStock(stock,start,end):
                 #hist_data=tdff.append(hist_data)
                 #print(hist_data)
                 print("fast success")
-                hist_data.to_csv(filepath, float_format='%.4f')
+                saveDataFrameData(hist_data,filepath)
                 return hist_data
 
         #return
@@ -411,12 +418,13 @@ def fastUpdateStock(stock,start,end):
             if type(hist_data)==type(None):
                 return None
             hist_data.set_index("date",inplace=True)
-            hist_data.to_csv(filepath, float_format='%.4f')
+            saveDataFrameData(hist_data,filepath)
         else:
             print("ok price")
             newdata.set_index("date",inplace=True)
             adptDataFrame(hist_data)
-            newdata.to_csv(filepath)
+            #newdata.to_csv(filepath)
+            saveDataFrameData(newdata,filepath)
             newdata=pd.read_csv(filepath,index_col="date")
             adptDataFrame(hist_data)
             print(newdata)
@@ -424,7 +432,8 @@ def fastUpdateStock(stock,start,end):
             tdata=pd.concat([newdata,hist_data])
     
             #print(tdata)
-            tdata.to_csv(filepath, float_format='%.4f')
+            #tdata.to_csv(filepath, float_format='%.4f')
+            saveDataFrameData(tdata,filepath)
             hist_data=pd.read_csv(filepath,index_col="date")
         
     else:  
@@ -436,7 +445,7 @@ def fastUpdateStock(stock,start,end):
             return None
         hist_data.set_index("date",inplace=True)
         adptDataFrame(hist_data)
-        hist_data.to_csv(filepath, float_format='%.4f')
+        saveDataFrameData(hist_data,filepath)
     return hist_data   
     
 def workAStock(stock):
