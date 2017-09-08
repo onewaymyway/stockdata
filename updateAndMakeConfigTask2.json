@@ -1,7 +1,7 @@
 {
     "tasks": [
         [
-            "python stockdatawork.py getdatafast"
+            "python stockdatawork2.py getdatafast"
         ],
         [
             "node D:/me/python/stocksite.git/trunk/StockCmd/bin/h5/StockCmd.max.js D:/me/python/stockdata.git/trunk/stockdatas minUnderDay=5 outFile=D:/me/python/stocksitepublish.git/trunk/last.json"
