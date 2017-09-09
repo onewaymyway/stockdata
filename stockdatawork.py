@@ -13,6 +13,7 @@ stockBasicInfo=None
 myG={}
 workingStock=[]
 blackList=["000033"]
+blackList=[]
 lastTradeDay=""
 last2TradeDay=""
 todayData=None
@@ -214,7 +215,7 @@ def saveStockKLine(stock,start,end):
             date_time=dates
         t = date2num(date_time)
         #open,high,low,close = row[:4]
-        open,high,close,low = row[:4]
+        close,high,low,open = row[:4]
         datas = (t,open,high,low,close)
         data_list.append(datas)
 
