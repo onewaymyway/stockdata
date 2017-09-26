@@ -342,7 +342,7 @@ def adptDataFrame(df):
     if "code" in df.columns:
         df.drop("code",1,inplace=True)
 def saveDataFrameData(hist_data,filepath):
-    hist_data.to_csv(filepath, float_format='%.3f',columns=["date","close","high","low","open","volume"])
+    hist_data.to_csv(filepath, float_format='%.3f',columns=["close","high","low","open","volume"])
 
 def readStockDataFromFile(filepath):
     hist_data=pd.read_csv(filepath,index_col="date")
