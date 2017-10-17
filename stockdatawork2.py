@@ -369,14 +369,14 @@ def fastUpdateStock(stock,start,end):
         if premax>=getLastTradeDay():
             return hist_data
         print(premax,last2TradeDay)
-        print("getTodayStockData");
+        #print("getTodayStockData");
         dd=getTodayStockData(stock)
-        print("getTodayStockDatasuccess",dd)
+        #print("getTodayStockDatasuccess",dd)
         #print("getTodayStockData success",dd)
         if dd!=None and dd["high"]==0:
             print("not trade:",stock)
             return hist_data
-        print("premax==last2TradeDay",premax==last2TradeDay,dd)
+        #print("premax==last2TradeDay",premax==last2TradeDay,dd)
         if premax==last2TradeDay:
             
             if dd==None or abs(dd["prePrice"]-preCloseP)>0.1:
@@ -402,14 +402,13 @@ def fastUpdateStock(stock,start,end):
                 return hist_data
 
         #return
-        print("premax!=last2TradeDay")
+        #print("premax!=last2TradeDay")
        
         hist_data=hist_data.drop(premax)
 
         newdata=ts.get_k_data(stock,premax,getLastTradeDay(),pause=1)
         newdata.set_index("date",inplace=True)
-        print("getkdata:",newdata)
-        print("cc,",newdata.ix[premax])
+        #print("cc,",newdata.ix[premax])
         newCloseP=newdata.ix[premax]["close"]
         #print(newdata.ix[premax])
         print("preclose:",preCloseP,"newclose:",newCloseP)
