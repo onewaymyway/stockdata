@@ -369,12 +369,14 @@ def fastUpdateStock(stock,start,end):
         if premax>=getLastTradeDay():
             return hist_data
         print(premax,last2TradeDay)
+        print("getTodayStockData");
         dd=getTodayStockData(stock)
+        print("getTodayStockDatasuccess",dd)
         #print("getTodayStockData success",dd)
         if dd!=None and dd["high"]==0:
             print("not trade:",stock)
             return hist_data
-        #print("premax==last2TradeDay",premax==last2TradeDay,dd)
+        print("premax==last2TradeDay",premax==last2TradeDay,dd)
         if premax==last2TradeDay:
             
             if dd==None or abs(dd["prePrice"]-preCloseP)>0.1:
@@ -400,11 +402,15 @@ def fastUpdateStock(stock,start,end):
                 return hist_data
 
         #return
+        print("premax!=last2TradeDay")
        
         hist_data=hist_data.drop(premax)
 
         newdata=ts.get_k_data(stock,premax,getLastTradeDay(),pause=1)
-        newCloseP=newdata.ix[premax]["close"][0]
+        newdata.set_index("date",inplace=True)
+        print("getkdata:",newdata)
+        print("cc,",newdata.ix[premax])
+        newCloseP=newdata.ix[premax]["close"]
         #print(newdata.ix[premax])
         print("preclose:",preCloseP,"newclose:",newCloseP)
         if abs(preCloseP-newCloseP)>0.1:
@@ -421,15 +427,18 @@ def fastUpdateStock(stock,start,end):
             saveDataFrameData(hist_data,filepath)
         else:
             print("ok price")
-            newdata.set_index("date",inplace=True)
+            #newdata.set_index("date",inplace=True)
             adptDataFrame(hist_data)
+            #print("try saveDataFrameData")
             #newdata.to_csv(filepath)
             saveDataFrameData(newdata,filepath)
             newdata=pd.read_csv(filepath,index_col="date")
+            
             adptDataFrame(hist_data)
-            print(newdata)
+            #print(newdata)
          
-            tdata=pd.concat([newdata,hist_data])
+            #tdata=pd.concat([newdata,hist_data])
+            tdata=pd.concat([hist_data,newdata])
     
             #print(tdata)
             #tdata.to_csv(filepath, float_format='%.4f')
@@ -512,6 +521,7 @@ def updateDataWorkLoop(reverse=False,fast=False):
     print("updateDataWorkLoop")
     stocks=myG["codes"]
     stocks=list(stocks)
+    #stocks=["300467"]
     #print(stocks)
     if reverse:
         stocks.reverse()
