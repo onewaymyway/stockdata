@@ -1,0 +1,2 @@
+taskrunutils.py MakeConfigTaskAndpublish.json
+pause
