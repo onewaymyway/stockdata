@@ -11,7 +11,7 @@ def updateWork():
 def myWork():
     timeL=TimeList()
     #timeL.addTask("15:09:50",None,"hihi")
-    timeL.addTask("15:30:50",updateWork,"updateWork")
+    timeL.addTask("16:00:50",updateWork,"updateWork")
     timeL.beginRun();
 
 myWork()
