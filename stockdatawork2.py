@@ -8,6 +8,7 @@ import os
 import pandas as pd
 import sys
 from multiprocessing.dummy import Pool as ThreadPool
+import traceback
 
 stockBasicInfo=None
 myG={}
@@ -67,11 +68,12 @@ def getStockBeginDay(stock):
     if myG["basicfromcsv"]==True:
         stock =int(stock)
     #print(stock)
-    date = df.ix[stock]['timeToMarket'] #上市日期YYYYMMDD
+    date = int(df.ix[stock]['timeToMarket']) #上市日期YYYYMMDD
     #print(df.ix[stock])
     #print(date)
     
     timeArray = time.strptime(str(date),'%Y%m%d')
+    timeArray=time.localtime(date)
     newdate=time.strftime("%Y-%m-%d",timeArray)
     return newdate
 
@@ -281,7 +283,7 @@ def getLastTradeDay():
     return lastTradeDay
 
 def fastUpdateData():
-    initStockBasic(False)
+    initStockBasic(True)
     getLastTradeDay()
     global todayData
     getDataSuccess=False
@@ -481,9 +483,13 @@ def checkStocksLoop():
     checkStocks(stocks)
     
 def updateStockDataWork(stock,updating=False,fast=False):
+    #print("getStockBeginDay")
     start=getStockBeginDay(stock)
+    #print("getLastTradeDay")
     end=getLastTradeDay()
+    
     if fast==True:
+        #print("fastUpdateStock")
         fastUpdateStock(stock,start,end)
         return
         
@@ -505,13 +511,15 @@ def analyseWorkLoop(reverse=False):
 
 def updateStocks(stocks,fast=False):
     for stock in stocks:
-        #print(stock)
+        #print("workStock:",stock)
         if isStockOnMarket(stock)==False:
             continue;
         try:
+            #print("updateStockDataWork");
             updateStockDataWork(stock,True,fast)
         except Exception as err:
             print(err)
+            print(traceback.format_exc())
             time.sleep(1)
         
 
