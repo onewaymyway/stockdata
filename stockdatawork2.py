@@ -350,8 +350,11 @@ def readStockDataFromFile(filepath):
     hist_data=pd.read_csv(filepath,index_col="date")
     adptDataFrame(hist_data)
     return hist_data
-    
-def fastUpdateStock(stock,start,end):
+
+def getDFMaxDay(df):
+    hindex=df.index
+    return max(hindex)
+def fastUpdateStock(stock,start,end,failContinue=True):
     print("fast update:",stock,start,end)
     filepath=dataPath+stock+".csv"
     if os.path.exists(filepath):
@@ -386,6 +389,8 @@ def fastUpdateStock(stock,start,end):
                 if dd!=None:
                     print("price",dd["prePrice"],preCloseP)
                 pass
+                if not failContinue:
+                    return
             else:
                 del dd["prePrice"]
                 #print(dd)
@@ -444,6 +449,9 @@ def fastUpdateStock(stock,start,end):
             #print(tdata)
             #tdata.to_csv(filepath, float_format='%.4f')
             saveDataFrameData(tdata,filepath)
+            if getDFMaxDay(tdata)==last2TradeDay:
+                print("fast udate after net update")
+                fastUpdateStock(stock,start,end,False)
             hist_data=pd.read_csv(filepath,index_col="date")
         
     else:  
