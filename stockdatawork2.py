@@ -359,7 +359,13 @@ def fastUpdateStock(stock,start,end,failContinue=True):
     filepath=dataPath+stock+".csv"
     if os.path.exists(filepath):
         print("getDataFromDisk:",stock)
-        hist_data=pd.read_csv(filepath,index_col="date")
+        try:
+            hist_data=pd.read_csv(filepath,index_col="date")
+        except:
+            removeFile(filepath)
+            fastUpdateStock(stock,start,end,failContinue)
+            return
+        
         adptDataFrame(hist_data)
         hindex=hist_data.index
         print(max(hindex))
