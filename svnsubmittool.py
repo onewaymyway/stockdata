@@ -18,7 +18,8 @@ def getChangedFiles():
             print(tt)
             continue
         if tfile[0]=="?":
-            print("? skip")
+            print("? add")
+            submitAddFile(tfile[1].replace("\\","/"))
             continue
         tfile=tfile[1]
         tfile=tfile.replace("\\","/")
@@ -39,6 +40,10 @@ def submitFiles(files):
     datas=executeSvnCmd(cmsStr)
     print("submit",datas)
 
+def submitAddFile(file):
+    executeSvnCmd("svn add "+file)
+    executeSvnCmd("svn commit -m hihi "+file)
+    
 def workLoop():
     changefiles=getChangedFiles()
     allLen=len(changefiles)
