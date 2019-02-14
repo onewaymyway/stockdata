@@ -21,8 +21,11 @@ def getChangedFiles():
             print("? add")
             submitAddFile(tfile[1].replace("\\","/"))
             continue
+        
         tfile=tfile[1]
         tfile=tfile.replace("\\","/")
+        if tfile.find(".csv.")>0:
+            continue
         files.append(tfile)
     
     #print(files)
@@ -57,6 +60,7 @@ def submitAddFile(file):
     executeSvnCmd("svn commit -m hihi "+file)
     
 def workLoop():
+    executeSvnCmd("svn cleanup")
     changefiles=getChangedFiles()
     allLen=len(changefiles)
     print(allLen)
@@ -67,9 +71,10 @@ def workLoop():
     if sublen<1:
         return False
     start=0
-    oneCount=2
+    oneCount=20
     endPos=start+oneCount
     while start<maxLen:
+        print("updateFiles",start,endPos)
         updateFiles(changefiles[start:endPos])
         start=endPos
         endPos=start+oneCount
