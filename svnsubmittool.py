@@ -1,9 +1,40 @@
 import subprocess
  
- 
+
+
+def updateFiles(files):
+    print("files:",files)
+    filesStr=" ".join(files)
+    print(filesStr)
+    cmds=["svn","update",filesStr]
+    print(cmds)
+    cmsStr=" ".join(cmds)
+    print("cmsStr",cmsStr)
+    #executeSvnCmd("svn cleanup")
+    datas=executeSvnCmd(cmsStr)
+    print("update",datas)
+    
+def txt_wrap_by(start_str, end, html):
+    start = html.find(start_str)
+    if start >= 0:
+        start += len(start_str)
+        end = html.find(end, start)
+        if end >= 0:
+            return html[start:end].strip()
+def dealErr(errMsg):
+    print(errMsg)
+    errfile=txt_wrap_by("'","'",errMsg)
+    errfile=errfile.replace("D:\\me\\python\\stockdata.git\\trunk\\","")
+    print("errFile:",errfile)
+    updateFiles([errfile])
+    
 def executeSvnCmd(cmds):
-    p = subprocess.Popen(cmds, stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=True)
+    p = subprocess.Popen(cmds, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
     datas=p.stdout.read().decode("utf-8")
+    errs=p.stderr.read().decode("utf-8")
+    print("myerrs:",errs)
+    if errs.find("is out of date")>0:
+        dealErr(errs)
     return datas
 
 def getChangedFiles():
