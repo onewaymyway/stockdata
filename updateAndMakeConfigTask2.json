@@ -4,19 +4,19 @@
             "python stockdatawork2.py getdatafast"
         ],
         [
-            "node D:/me/python/stocksite.git/trunk/StockCmd/bin/h5/StockCmd.max.js D:/me/python/stockdata.git/trunk/stockdatas minUnderDay=5 outFile=D:/me/python/stocksitepublish.git/trunk/last.json"
+            "node D:/me/python/stocksite.git/trunk/StockCmd/bin/h5/StockCmd.max.js D:/me/python/stockdata.git/stockdatas minUnderDay=5 outFile=D:/me/python/stocksitepublish.git/trunk/last.json"
         ],
         [
-            "python mycopy.py D:/me/python/stocksitepublish.git/trunk/last.json D:/me/python/stocksite.git/trunk/StockView/bin/h5/last.json"
+            "python mycopy.py D:/me/python/stocksitepublish.git/trunk/last.json D:/me/python/stocksite.git/StockView/bin/h5/last.json"
         ],
         [
-            "D:/me/tools/ApacheSubversion/bin/svn.exe cleanup D:/me/python/stockdata.git/trunk/stockdatas",
+            "D:/me/tools/ApacheSubversion/bin/svn.exe cleanup D:/me/python/stockdata.git/stockdatas",
             "D:/me/tools/ApacheSubversion/bin/svn.exe cleanup D:/me/python/stocksitepublish.git/trunk/last.json",
-            "D:/me/tools/ApacheSubversion/bin/svn.exe cleanup D:/me/python/stocksite.git/trunk/StockView/bin/h5/last.json"
+            "D:/me/tools/ApacheSubversion/bin/svn.exe cleanup D:/me/python/stocksite.git/StockView/bin/h5/last.json"
         ],
         [
             "D:/me/tools/ApacheSubversion/bin/svn.exe commit -m hihi D:/me/python/stocksitepublish.git/trunk/last.json",
-            "D:/me/tools/ApacheSubversion/bin/svn.exe commit -m hihi D:/me/python/stocksite.git/trunk/StockView/bin/h5/last.json"
+            "D:/me/tools/ApacheSubversion/bin/svn.exe commit -m hihi D:/me/python/stocksite.git/StockView/bin/h5/last.json"
         ],
         [
             "python svnsubmittool.py"
