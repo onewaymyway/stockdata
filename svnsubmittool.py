@@ -27,6 +27,27 @@ def dealErr(errMsg):
     errfile=errfile.replace("D:\\me\\python\\stockdata.git\\trunk\\","")
     print("errFile:",errfile)
     updateFiles([errfile])
+
+def solveConflictFiles(files):
+    print("files:",files)
+    filesStr=" ".join(files)
+    print(filesStr)
+    #svn resolve --accept=working bar.c
+    cmds=["svn","resolve --accept=working",filesStr]
+    print(cmds)
+    cmsStr=" ".join(cmds)
+    print("cmsStr",cmsStr)
+    #executeSvnCmd("svn cleanup")
+    datas=executeSvnCmd(cmsStr)
+    print("solveConflictFiles",datas)
+    submitFiles(files)
+    
+def dealConflict(errMsg):
+    print(errMsg)
+    errfile=txt_wrap_by("'","'",errMsg)
+    errfile=errfile.replace("D:\\me\\python\\stockdata.git\\trunk\\","")
+    print("conflictFile:",errfile)
+    solveConflictFiles([errfile])
     
 def executeSvnCmd(cmds):
     p = subprocess.Popen(cmds, stdin=subprocess.PIPE, stdout=subprocess.PIPE,stderr=subprocess.PIPE, shell=True)
@@ -35,6 +56,8 @@ def executeSvnCmd(cmds):
     print("myerrs:",errs)
     if errs.find("is out of date")>0:
         dealErr(errs)
+    if errs.find("Conflict discovered")>0 or errs.find("remains in conflict")>0:
+        dealConflict(errs)
     return datas
 
 def getChangedFiles():
@@ -47,6 +70,10 @@ def getChangedFiles():
         tfile=tt.split("       ")
         if len(tfile)<2:
             print(tt)
+            continue
+        if tfile[0]=="C":
+            print("? conflict")
+            solveConflictFiles([tfile[1].replace("\\","/")])
             continue
         if tfile[0]=="?":
             print("? add")
@@ -72,6 +99,8 @@ def submitFiles(files):
     print("submit",datas)
 
 def submitAddFile(file):
+    if file.find(".csv.r")>0 or file.find(".csv.m")>0:
+        return
     executeSvnCmd("svn add "+file)
     executeSvnCmd("svn commit -m hihi "+file)
     
@@ -80,7 +109,7 @@ def workLoop():
     allLen=len(changefiles)
     print(allLen)
     sublen=allLen
-    maxLen=50
+    maxLen=2
     if sublen>maxLen:
         sublen=maxLen
     if sublen<1:
