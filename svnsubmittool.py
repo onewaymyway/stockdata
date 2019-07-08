@@ -109,7 +109,7 @@ def workLoop():
     allLen=len(changefiles)
     print(allLen)
     sublen=allLen
-    maxLen=2
+    maxLen=50
     if sublen>maxLen:
         sublen=maxLen
     if sublen<1:
